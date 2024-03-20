@@ -10,6 +10,9 @@ WORKDIR /app
 COPY package.json package-lock* ./
 RUN npm ci
 
+COPY prisma ./prisma/
+RUN npx prisma generate
+
 # Rebuild the source code only when needed
 FROM deps AS builder
 WORKDIR /app
@@ -24,6 +27,11 @@ COPY . .
 ENV NODE_ENV development
 
 CMD npm run dev
+
+# Run Prisma migration scripts
+FROM deps AS migrate
+
+CMD npx prisma migrate deploy 
 
 # Production image, copy all the files and run next
 FROM base AS runner

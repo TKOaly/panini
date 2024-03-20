@@ -1,48 +1,25 @@
-import {
-  cachedRecentObesrvations,
-  createObservation,
-} from "@/services/observation";
-import LogIn from "@/components/log-in";
-import LogOut from "@/components/log-out";
-import { config } from "@/next-auth";
-import { getServerSession } from "next-auth";
-import { cachedPaninis } from "@/services/panini";
-import { cachedUnicafes } from "@/services/unicafe";
+import { createObservation } from "@/services/observation";
+import { cachedPaninis, cachedRecentlySeenPaninis } from "@/services/panini";
+import { ObservationForm } from "./ObservationForm";
+import { RecentlySeenList } from "./RecentlySeenList";
 
 export default async function Home() {
-  const session = await getServerSession(config);
-  const recentObservations = await cachedRecentObesrvations();
   const paninis = await cachedPaninis();
-  const unicafes = await cachedUnicafes();
+  const recentlySeenPaninis = await cachedRecentlySeenPaninis();
+
+  if (paninis.length === 0) {
+    return (
+      <div>
+        <p>This instance of Dr. Panini has not been set up yet.</p>
+        <p>Please ask an adminstrator to add paninis to the system.</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <pre>{JSON.stringify(session, null, 2)}</pre>
-      {recentObservations.map((observation) => (
-        <pre key={observation.id}>
-          {observation.paniniId} {observation.time.toLocaleString()}
-        </pre>
-      ))}
-      {recentObservations.length === 0 && <pre>no panini observations</pre>}
-      <form action={createObservation}>
-        <select name="paniniId">
-          {paninis.map((panini) => (
-            <option key={panini.id} value={panini.id}>
-              {panini.name}
-            </option>
-          ))}
-        </select>
-        <select name="unicafeId">
-          {unicafes.map((unicafe) => (
-            <option key={unicafe.id} value={unicafe.id}>
-              {unicafe.name}
-            </option>
-          ))}
-        </select>
-        <button type="submit">observe</button>
-      </form>
-      <LogIn />
-      <LogOut />
-    </>
+    <main className="p-4 flex flex-col gap-y-4 w-full max-w-[80ch]">
+      <RecentlySeenList paninis={recentlySeenPaninis} />
+      <ObservationForm paninis={paninis} action={createObservation} />
+    </main>
   );
 }
