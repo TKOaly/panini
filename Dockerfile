@@ -23,6 +23,8 @@ COPY . .
 
 ENV NODE_ENV development
 
+CMD npm run dev
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
