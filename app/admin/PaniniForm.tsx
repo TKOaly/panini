@@ -1,13 +1,24 @@
 "use client";
 
+import { useRef } from "react";
+
 export type PaniniFormProps = {
   action: (data: FormData) => Promise<void>;
 };
 
 export const PaniniForm = ({ action }: PaniniFormProps) => {
+  const formRef = useRef<HTMLFormElement>(null);
+
   return (
     <div>
-      <form action={action} className="flex flex-col gap-4">
+      <form
+        action={async (formData) => {
+          await action(formData);
+          formRef.current?.reset();
+        }}
+        ref={formRef}
+        className="flex flex-col gap-4"
+      >
         <input name="name" placeholder="name" />
         <input name="description" placeholder="description" />
         <input name="image" type="file" />

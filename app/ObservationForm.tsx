@@ -37,7 +37,10 @@ export const ObservationForm = ({ paninis, action }: ObservationFormProps) => {
 
   return (
     <form
-      action={action}
+      action={async (formData) => {
+        await action(formData);
+        setSelectedPaninis([]);
+      }}
       className="border-2 rounded-lg p-2 flex flex-col gap-y-2 w-max max-w-full"
     >
       <div>
