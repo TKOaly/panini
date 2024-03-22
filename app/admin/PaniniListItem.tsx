@@ -22,7 +22,7 @@ export const PaniniListItem = ({
     <form
       key={panini.id}
       action={action}
-      className="flex flex-col gap-x-2 border-2 rounded-lg p-2 relative"
+      className="min-w-96 flex flex-col gap-x-2 border-2 rounded-lg p-2 relative"
     >
       <div>
         <h3 className="text-lg font-semibold">{panini.name}</h3>

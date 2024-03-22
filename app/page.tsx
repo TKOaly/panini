@@ -9,7 +9,7 @@ export default async function Home() {
 
   if (paninis.length === 0) {
     return (
-      <div>
+      <div className="p-4">
         <p>This instance of Dr. Panini has not been set up yet.</p>
         <p>Please ask an adminstrator to add paninis to the system.</p>
       </div>
