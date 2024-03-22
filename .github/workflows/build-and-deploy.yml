@@ -36,6 +36,18 @@ jobs:
             type=ref,event=pr
             type=raw,value=sha-${{ steps.sha.outputs.value }}
 
+      - name: Extract Docker metadata for the migration runner image
+        id: migrate-meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.PRIVATE_REGISTRY_URL }}/panini-migrate
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=raw,value=sha-${{ steps.sha.outputs.value }}
+
       - name: Build and push the Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
@@ -43,6 +55,17 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-to: type=gha
+          cache-from: type=gha
+
+      - name: Build and push the migration Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          target: migrate
+          push: true
+          tags: ${{ steps.migrate-meta.outputs.tags }}
+          labels: ${{ steps.migrate-meta.outputs.labels }}
           cache-to: type=gha
           cache-from: type=gha
 
