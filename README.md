@@ -13,3 +13,7 @@ The best way to run the app is the [tko-aly.localhost development environment](h
 `next.js` with `next-auth` configured to user-service, `minio` for storing images, `prisma` for database access, `react-query` `tailwindcss` for styling.
 
 package manager `npm`, language `typescript`.
+
+### credits
+
+favicon by Joona Kauppila
