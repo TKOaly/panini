@@ -15,6 +15,13 @@ export const cachedPaninis = unstable_cache(
   },
 );
 
+/**
+ * Function to get a new date that is midnight of the current day.
+ */
+export function getMidnightDate(date: Date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 export const cachedRecentlySeenPaninis = unstable_cache(
   async () =>
     await prisma.panini.findMany({
@@ -22,7 +29,7 @@ export const cachedRecentlySeenPaninis = unstable_cache(
         observations: {
           some: {
             time: {
-              gte: new Date(Date.now() - 1000 * 60 * 60 * 24),
+              gte: getMidnightDate(),
             },
           },
         },
@@ -39,7 +46,7 @@ export const cachedRecentlySeenPaninis = unstable_cache(
             observations: {
               where: {
                 time: {
-                  gte: new Date(Date.now() - 1000 * 60 * 60 * 24),
+                  gte: getMidnightDate(),
                 },
               },
             },
