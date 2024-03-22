@@ -11,7 +11,7 @@ export const cachedPaninis = unstable_cache(
   ["all-paninis"],
   {
     tags: [ALL_PANINI_TAG],
-    revalidate: 30 * 1000,
+    revalidate: 30,
   },
 );
 
@@ -50,7 +50,7 @@ export const cachedRecentlySeenPaninis = unstable_cache(
   ["recent-paninis"],
   {
     tags: [ALL_PANINI_TAG],
-    revalidate: 30 * 1000,
+    revalidate: 30,
   },
 );
 
