@@ -1,12 +1,14 @@
 "use client";
 
 import { Panini } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PaniniImage } from "./PaniniImage";
+import { useFormState } from "react-dom";
+import type { CreateObservationAction } from "@/services/observation";
 
 type ObservationFormProps = {
   paninis: Panini[];
-  action: (data: FormData) => Promise<void>;
+  action: CreateObservationAction;
 };
 
 const PaniniOption = ({
@@ -35,12 +37,15 @@ export const ObservationForm = ({ paninis, action }: ObservationFormProps) => {
         : [...selectedPaninis, id],
     );
 
+  const [state, formAction] = useFormState(action, {});
+
+  useEffect(() => {
+    setSelectedPaninis([]);
+  }, [state.message]);
+
   return (
     <form
-      action={async (formData) => {
-        await action(formData);
-        setSelectedPaninis([]);
-      }}
+      action={formAction}
       className="border-2 rounded-lg p-2 flex flex-col gap-y-2 w-max max-w-full"
     >
       <div>
@@ -64,6 +69,7 @@ export const ObservationForm = ({ paninis, action }: ObservationFormProps) => {
       >
         Submit
       </button>
+      {state.error && <p className="text-red-500">{state.error}</p>}
     </form>
   );
 };

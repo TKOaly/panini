@@ -35,15 +35,24 @@ export const cachedRecentObservations = unstable_cache(
   },
 );
 
-export async function createObservation(formData: FormData) {
+export async function createObservation(
+  prevState: any,
+  formData: FormData,
+): Promise<{
+  error?: string;
+  message?: string;
+}> {
   "use server";
 
   const rawPaniniIds = formData.get("paniniIds");
   if (typeof rawPaniniIds !== "string") {
-    throw new Error("invalid paninis");
+    return { error: "Invalid paniniIds" };
   }
 
-  const paniniIds = rawPaniniIds.split(";");
+  const paniniIds = rawPaniniIds.trim().split(";");
+  if (rawPaniniIds === "" || paniniIds.length === 0) {
+    return { error: "No paninis selected" };
+  }
 
   // Create observations for all paninis selected
   const time = new Date();
@@ -57,4 +66,7 @@ export async function createObservation(formData: FormData) {
   }
   revalidateTag(ALL_OBSERVATIONS_TAG);
   revalidateTag(ALL_PANINI_TAG);
+
+  return { message: "Observation created" };
 }
+export type CreateObservationAction = typeof createObservation;

@@ -61,29 +61,42 @@ export const cachedRecentlySeenPaninis = unstable_cache(
   },
 );
 
-export async function createPanini(formData: FormData) {
+export async function createPanini(
+  prevState: any,
+  formData: FormData,
+): Promise<{
+  error?: string;
+  message?: string;
+}> {
   "use server";
 
   const name = formData.get("name");
   if (typeof name !== "string" || name.length < 3) {
-    throw new Error("invalid name");
+    return { error: "Invalid name" };
   }
 
   const description = formData.get("description");
   if (typeof description !== "string" && description !== null) {
-    throw new Error("invalid description");
+    return { error: "Invalid description" };
   }
 
-  const panini = await prisma.panini.create({
-    data: {
-      name,
-      description,
-    },
-  });
+  let panini: Panini;
+  try {
+    panini = await prisma.panini.create({
+      data: {
+        name,
+        description,
+      },
+    });
+  } catch (e) {
+    console.error("failed to create panini", e);
+    return { error: "Failed to create panini. Does it have a unique name?" };
+  }
 
   const image = formData.get("image");
   if (!(image instanceof File) || image.size === 0) {
-    return revalidateTag(ALL_PANINI_TAG);
+    revalidateTag(ALL_PANINI_TAG);
+    return { message: "Panini created with placeholder image" };
   }
 
   const logoUploadUrl = await getLogoUploadUrl(panini);
@@ -111,17 +124,26 @@ export async function createPanini(formData: FormData) {
         id: panini.id,
       },
     });
-    throw new Error("failed to upload image");
+    return { error: "Failed to upload image" };
   }
   revalidateTag(ALL_PANINI_TAG);
-}
 
-export async function destroyPanini(formData: FormData) {
+  return { message: "Panini created" };
+}
+export type CreatePaniniAction = typeof createPanini;
+
+export async function destroyPanini(
+  prevState: any,
+  formData: FormData,
+): Promise<{
+  error?: string;
+  message?: string;
+}> {
   "use server";
 
   const id = Number(formData.get("id"));
   if (!id || Number.isNaN(id)) {
-    throw new Error("invalid panini ID");
+    return { error: "Invalid panini ID" };
   }
 
   await prisma.panini.delete({
@@ -130,7 +152,10 @@ export async function destroyPanini(formData: FormData) {
     },
   });
   revalidateTag(ALL_PANINI_TAG);
+
+  return { message: "Panini deleted" };
 }
+export type DestroyPaniniAction = typeof destroyPanini;
 
 async function getLogoUploadUrl(panini: Panini): Promise<{
   server: string;

@@ -1,24 +1,24 @@
 "use client";
 
-import { useRef } from "react";
+import { CreatePaniniAction } from "@/services/panini";
+import { useEffect, useRef } from "react";
+import { useFormState } from "react-dom";
 
 export type PaniniFormProps = {
-  action: (data: FormData) => Promise<void>;
+  action: CreatePaniniAction;
 };
 
 export const PaniniForm = ({ action }: PaniniFormProps) => {
   const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction] = useFormState(action, {});
+
+  useEffect(() => {
+    formRef.current?.reset();
+  }, [state.message]);
 
   return (
     <div>
-      <form
-        action={async (formData) => {
-          await action(formData);
-          formRef.current?.reset();
-        }}
-        ref={formRef}
-        className="flex flex-col gap-4"
-      >
+      <form action={formAction} ref={formRef} className="flex flex-col gap-4">
         <input name="name" placeholder="name" />
         <input name="description" placeholder="description" />
         <input name="image" type="file" />
@@ -28,6 +28,7 @@ export const PaniniForm = ({ action }: PaniniFormProps) => {
         >
           create panini
         </button>
+        {state.error && <p className="text-red-500">{state.error}</p>}
       </form>
     </div>
   );
