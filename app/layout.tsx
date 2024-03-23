@@ -10,12 +10,16 @@ const emberly = localFont({ src: "../assets/Emberly-Regular.otf" });
 import logo from "@/assets/logo.svg";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn, signOut } from "next-auth/react";
 import { Footer } from "./Footer";
 
 export const metadata: Metadata = {
-  title: "Panini",
+  title: "Dr. Panini",
   description: "Tracking paninis - by TKO-äly",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "application-name": "Dr. Panini",
+  },
 };
 
 export default async function RootLayout({
