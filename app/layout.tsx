@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -11,6 +11,10 @@ import logo from "@/assets/logo.svg";
 import Image from "next/image";
 import Link from "next/link";
 import { Footer } from "./Footer";
+
+export const viewport: Viewport = {
+  themeColor: "#eab308",
+};
 
 export const metadata: Metadata = {
   title: "Dr. Panini",
