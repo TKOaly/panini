@@ -7,7 +7,12 @@ export const ALL_PANINI_TAG = "paninis";
 const BUCKET_NAME = "panini-images";
 
 export const cachedPaninis = unstable_cache(
-  async () => await prisma.panini.findMany(),
+  async () =>
+    await prisma.panini.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    }),
   ["all-paninis"],
   {
     tags: [ALL_PANINI_TAG],
