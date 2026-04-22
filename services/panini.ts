@@ -162,6 +162,76 @@ export async function destroyPanini(
 }
 export type DestroyPaniniAction = typeof destroyPanini;
 
+export async function editPanini(
+  prevState: any,
+  formData: FormData,
+): Promise<{
+  error?: string;
+  message?: string;
+}> {
+  "use server";
+
+  const id = Number(formData.get("id"));
+  if (!id || Number.isNaN(id)) {
+    return { error: "Invalid panini ID" };
+  }
+
+  const name = formData.get("name");
+  if (typeof name !== "string" || name.length < 3) {
+    return { error: "Invalid name" };
+  }
+
+  const description = formData.get("description");
+  if (typeof description !== "string" && description !== null) {
+    return { error: "Invalid description" };
+  }
+
+  let panini: Panini;
+  try {
+    panini = await prisma.panini.update({
+      where: { id },
+      data: {
+        name,
+        description,
+      },
+    });
+  } catch (e) {
+    console.error("failed to edit panini", e);
+    return { error: "Failed to edit panini" };
+  }
+
+  const image = formData.get("image");
+  if (image instanceof File && image.size > 0) {
+    const logoUploadUrl = await getLogoUploadUrl(panini);
+    try {
+      await fetch(logoUploadUrl.server, {
+        method: "PUT",
+        body: image,
+        headers: {
+          "Content-Type": "image/*",
+        },
+      });
+
+      await prisma.panini.update({
+        where: {
+          id: panini.id,
+        },
+        data: {
+          image: logoUploadUrl.client,
+        },
+      });
+    } catch (error) {
+      console.error("failed to upload image", error);
+      return { error: "Failed to upload new image" };
+    }
+  }
+
+  revalidateTag(ALL_PANINI_TAG);
+
+  return { message: "Panini updated" };
+}
+export type EditPaniniAction = typeof editPanini;
+
 async function getLogoUploadUrl(panini: Panini): Promise<{
   server: string;
   client: string;
