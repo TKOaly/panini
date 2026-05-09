@@ -55,7 +55,7 @@ export const PaniniListItem = ({
             aria-label="description"
             className="max-w-72 border rounded border-gray-300 px-2"
           />
-          <input name="image" type="file" />
+          <input name="image" type="file" aria-label="image" accept="image/*" />
           <button
             type="submit"
             className="py-1 px-2 font-bold hover:bg-black/10 border border-black w-max active:scale-95 transition"
