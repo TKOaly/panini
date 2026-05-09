@@ -1,6 +1,8 @@
 import prisma from "@/db";
 import { Panini } from "@prisma/client";
 import { revalidateTag, unstable_cache } from "next/cache";
+import { getServerSession } from "next-auth";
+import { config } from "@/next-auth";
 import minio from "./minio";
 
 export const ALL_PANINI_TAG = "paninis";
@@ -75,6 +77,11 @@ export async function createPanini(
 }> {
   "use server";
 
+  const session = await getServerSession(config);
+  if (!session?.user?.admin) {
+    return { error: "Unauthorized" };
+  }
+
   const name = formData.get("name");
   if (typeof name !== "string" || name.length < 3) {
     return { error: "Invalid name" };
@@ -146,6 +153,11 @@ export async function destroyPanini(
 }> {
   "use server";
 
+  const session = await getServerSession(config);
+  if (!session?.user?.admin) {
+    return { error: "Unauthorized" };
+  }
+
   const id = Number(formData.get("id"));
   if (!id || Number.isNaN(id)) {
     return { error: "Invalid panini ID" };
@@ -162,13 +174,98 @@ export async function destroyPanini(
 }
 export type DestroyPaniniAction = typeof destroyPanini;
 
-async function getLogoUploadUrl(panini: Panini): Promise<{
+export async function editPanini(
+  prevState: any,
+  formData: FormData,
+): Promise<{
+  error?: string;
+  message?: string;
+}> {
+  "use server";
+
+  const session = await getServerSession(config);
+  if (!session?.user?.admin) {
+    return { error: "Unauthorized" };
+  }
+
+  const id = Number(formData.get("id"));
+  if (!id || Number.isNaN(id)) {
+    return { error: "Invalid panini ID" };
+  }
+
+  const name = formData.get("name");
+  if (typeof name !== "string" || name.length < 3) {
+    return { error: "Invalid name" };
+  }
+
+  const description = formData.get("description");
+  if (typeof description !== "string" && description !== null) {
+    return { error: "Invalid description" };
+  }
+
+  const image = formData.get("image");
+  if (image instanceof File && image.size > 0) {
+    try {
+      const logoUploadUrl = await getLogoUploadUrl({ id });
+      const uploadResponse = await fetch(logoUploadUrl.server, {
+        method: "PUT",
+        body: image,
+        headers: {
+          "Content-Type": "image/*",
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(
+          `Image upload failed with status ${uploadResponse.status}`,
+        );
+      }
+    } catch (error) {
+      console.error("failed to upload image", error);
+      return { error: "Failed to upload new image" };
+    }
+  }
+
+  try {
+    await prisma.panini.update({
+      where: { id },
+      data: {
+        name,
+        description,
+      },
+    });
+  } catch (e) {
+    console.error("failed to edit panini", e);
+    return { error: "Failed to edit panini. Does it have a unique name?" };
+  }
+
+  revalidateTag(ALL_PANINI_TAG);
+
+  return { message: "Panini updated" };
+}
+export type EditPaniniAction = typeof editPanini;
+
+async function getLogoUploadUrl(panini: Pick<Panini, "id">): Promise<{
   server: string;
   client: string;
 }> {
   if (!(await minio.bucketExists(BUCKET_NAME))) {
     await minio.makeBucket(BUCKET_NAME);
   }
+
+  const policy = {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Principal: "*",
+        Action: ["s3:GetObject"],
+        Resource: [`arn:aws:s3:::${BUCKET_NAME}/*`],
+      },
+    ],
+  };
+  // Out of init scope to migrate existing buckets, move this to init scope afterwards
+  await minio.setBucketPolicy(BUCKET_NAME, JSON.stringify(policy));
 
   const serverUrl = new URL(
     await minio.presignedPutObject(BUCKET_NAME, panini.id.toString(), 60 * 30),
@@ -184,6 +281,8 @@ async function getLogoUploadUrl(panini: Panini): Promise<{
     publicUrl.protocol = actualPublicUrl.protocol;
     publicUrl.port = actualPublicUrl.port;
   }
+
+  publicUrl.search = "";
 
   return {
     server: serverUrl.toString(),
