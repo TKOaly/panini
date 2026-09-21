@@ -1,6 +1,6 @@
 "use client";
 
-import type { Panini } from "@/src/generated/browser";
+import { Panini } from "@prisma/client";
 import { Fragment, useEffect, useState } from "react";
 import { PaniniImage } from "../PaniniImage";
 
