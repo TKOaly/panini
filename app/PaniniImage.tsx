@@ -8,10 +8,14 @@ export const PaniniImage = ({
   className?: string;
 }) => {
   if (panini.image) {
+    const url = new URL(panini.image);
+    url.search = "";
+
+
     return (
       <img
         draggable="false"
-        src={panini.image ?? "/placeholder.png"}
+        src={url.toString() ?? "/placeholder.png"}
         alt={panini.description || panini.name}
         className={`block w-100 max-h-100 w-full ${className ?? ""}`}
       />
