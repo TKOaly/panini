@@ -1,4 +1,9 @@
-import { cachedPaninis, createPanini, destroyPanini } from "@/services/panini";
+import {
+  cachedPaninis,
+  createPanini,
+  destroyPanini,
+  editPanini,
+} from "@/services/panini";
 import { config } from "@/next-auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -20,7 +25,8 @@ export default async function Admin() {
           <PaniniListItem
             key={panini.id}
             panini={panini}
-            action={destroyPanini}
+            editAction={editPanini}
+            deleteAction={destroyPanini}
           />
         ))}
         {paninis.length === 0 && <pre>no paninis</pre>}
