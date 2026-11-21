@@ -17,6 +17,7 @@ services:
       - PUBLIC_URL=http://panini.tko-aly.localhost
       - MINIO_ACCESS_KEY=root
       - MINIO_SECRET_KEY=unsecure
+      - MINIO_REGION=us-east-1
       - MINIO_URL=http://minio:9000
       - MINIO_PUBLIC_URL=http://localhost:9000
       - PORT=3636
