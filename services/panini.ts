@@ -1,10 +1,9 @@
 import prisma from "@/db";
 import { Panini } from "@prisma/client";
 import { revalidateTag, unstable_cache } from "next/cache";
-import minio from "./minio";
+import minio, { BUCKET_NAME } from "./minio";
 
 export const ALL_PANINI_TAG = "paninis";
-const BUCKET_NAME = "panini-images";
 
 export const cachedPaninis = unstable_cache(
   async () =>

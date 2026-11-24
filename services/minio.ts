@@ -31,3 +31,5 @@ export default minio;
 if (process.env.NODE_ENV !== "production") {
   globalForMinio.minio = minio;
 }
+
+export const BUCKET_NAME = "panini-images";

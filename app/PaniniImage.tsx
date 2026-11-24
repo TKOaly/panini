@@ -8,14 +8,11 @@ export const PaniniImage = ({
   className?: string;
 }) => {
   if (panini.image) {
-    const url = new URL(panini.image);
-    url.search = "";
-
-
+    // Served through the app: the object storage does not allow anonymous reads.
     return (
       <img
         draggable="false"
-        src={url.toString() ?? "/placeholder.png"}
+        src={`/api/panini-images/${panini.id}`}
         alt={panini.description || panini.name}
         className={`block w-100 max-h-100 w-full ${className ?? ""}`}
       />
